@@ -358,6 +358,18 @@
     .app-main { padding: 1.5rem; }
   }
 </style>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+    const SUPABASE_URL = 'https://zsbzxntiefikjiswyech.supabase.co';
+    const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_v3-v7FXS-OL6sxjPTPIhIg_12UuWEpY';
+
+    const supabaseClient = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_PUBLISHABLE_KEY
+    );
+</script>
 </head>
 <body>
 
@@ -771,9 +783,9 @@
         </div>
         <div class="form-group">
           <label>Create Password</label>
-          <input type="password" placeholder="Minimum 8 characters">
+          <input type="password" id="employerPassword" placeholder="Minimum 8 characters">
         </div>
-        <button class="btn btn-primary btn-lg" onclick="handleSeekerRegister()">Create Free Account →</button>
+        <button class="btn btn-primary btn-lg" onclick="handleEmployerRegister()">Create Free Account →</button>  
       </div>
       <div class="register-panel">
         <div class="panel-icon">🏢</div>
@@ -781,15 +793,15 @@
         <p>Post jobs, manage applications, and find the best talent in Nigeria's largest verified candidate pool.</p>
         <div class="form-group">
           <label>Company Name</label>
-          <input type="text" placeholder="e.g. Acme Nigeria Ltd.">
+          <input type="text" id="companyName" placeholder="e.g. Acme Nigeria Ltd.">
         </div>
         <div class="form-group">
           <label>Contact Person</label>
-          <input type="text" placeholder="Full name">
+        <input type="text" id="employerName" placeholder="Full name">
         </div>
         <div class="form-group">
           <label>Business Email</label>
-          <input type="email" placeholder="hr@yourcompany.com">
+          <input type="email" id="employerEmail" placeholder="hr@yourcompany.com">
         </div>
         <div class="form-group">
           <label>Industry</label>
@@ -818,7 +830,7 @@
         </div>
         <div class="form-group">
           <label>Create Password</label>
-          <input type="password" placeholder="Minimum 8 characters">
+          <input type="password" id="seekerPassword" placeholder="Minimum 8 characters">
         </div>
         <button class="btn btn-accent btn-lg" onclick="handleEmployerRegister()">Start Hiring Free →</button>
         <p style="font-size:0.78rem;color:var(--mid);margin-top:0.75rem;text-align:center;">First 3 job posts are completely free. No credit card needed.</p>
@@ -1631,23 +1643,222 @@ function setLoginRole(role) {
   document.getElementById('loginSub').textContent = titles[role][1];
 }
 
-function handleLogin() {
-  const email = document.getElementById('loginEmail').value;
-  if (!email) { showToast('Please enter your email address'); return; }
-  if (currentRole === 'seeker') {
-    showPage('seekerDashboardPage');
-    switchSeekerTab('overview');
-    renderSeekerOverview();
-  } else if (currentRole === 'employer') {
-    showPage('employerDashboardPage');
-    switchEmployerTab('overview');
-    renderEmployerOverview();
-  } else {
-    showPage('adminDashboardPage');
-    switchAdminTab('overview');
-    renderAdminOverview();
-  }
-  showToast('Login successful! Welcome back.');
+
+async function handleLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email) {
+        showToast('Please enter your email address');
+        return;
+    }
+
+    if (!password) {
+        showToast('Please enter your password');
+        return;
+    }
+
+    showToast('Signing in...');
+
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        console.error('Login error:', error);
+        showToast(error.message);
+        return;
+    }
+
+    if (!data.user) {
+        showToast('Login failed. Please try again.');
+        return;
+    }
+
+    // Get the user's profile and role from Supabase
+    const { data: profile, error: profileError } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+    if (profileError) {
+        console.error('Profile error:', profileError);
+        showToast('Login worked, but your profile could not be loaded.');
+        return;
+    }
+
+    // Use the role stored in the database
+    currentRole = profile.role;
+
+    if (currentRole === 'seeker') {
+        showPage('seekerDashboardPage');
+        switchSeekerTab('overview');
+        renderSeekerOverview();
+    } else if (currentRole === 'employer') {
+        showPage('employerDashboardPage');
+        switchEmployerTab('overview');
+        renderEmployerOverview();
+    } else if (currentRole === 'admin') {
+        showPage('adminDashboardPage');
+        switchAdminTab('overview');
+        renderAdminOverview();
+    } else {
+        showToast('Your account has an invalid role.');
+        await supabaseClient.auth.signOut();
+        return;
+    }
+
+    showToast('Login successful! Welcome back.');
+}
+
+async function handleSeekerRegister() {
+    const name = document.getElementById('seekerName')?.value.trim();
+    const email = document.getElementById('seekerEmail')?.value.trim();
+    const password = document.getElementById('seekerPassword')?.value;
+
+    if (!name || !email || !password) {
+        showToast('Please fill in all required fields');
+        return;
+    }
+
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters');
+        return;
+    }
+
+    showToast('Creating your account...');
+
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: {
+                full_name: name,
+                role: 'seeker'
+            }
+        }
+    });
+
+    if (error) {
+        console.error('Registration error:', error);
+        showToast(error.message);
+        return;
+    }
+
+    if (data.user && !data.session) {
+        showToast('Account created! Please check your email to confirm your account.');
+        return;
+    }
+
+    if (data.user) {
+        currentRole = 'seeker';
+        showPage('seekerDashboardPage');
+        switchSeekerTab('overview');
+        renderSeekerOverview();
+        showToast('Account created successfully!');
+    }
+}
+
+
+async function handleEmployerRegister() {
+    const name = document.getElementById('employerName')?.value.trim();
+    const email = document.getElementById('employerEmail')?.value.trim();
+    const password = document.getElementById('employerPassword')?.value;
+    const company = document.getElementById('companyName')?.value.trim();
+
+    if (!name || !email || !password || !company) {
+        showToast('Please fill in all required fields');
+        return;
+    }
+
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters');
+        return;
+    }
+
+    showToast('Creating your employer account...');
+
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: {
+                full_name: name,
+                role: 'employer',
+                company_name: company
+            }
+        }
+    });
+
+    if (error) {
+        console.error('Employer registration error:', error);
+        showToast(error.message);
+        return;
+    }
+
+    if (data.user && !data.session) {
+        showToast('Account created! Please check your email to confirm your account.');
+        return;
+    }
+
+    if (data.user) {
+        currentRole = 'employer';
+        showPage('employerDashboardPage');
+        switchEmployerTab('overview');
+        renderEmployerOverview();
+        showToast('Employer account created successfully!');
+    }
+}
+
+async function handleSeekerRegister() {
+    const firstName = document.getElementById('seekerFirst').value.trim();
+    const lastName = document.getElementById('seekerLast').value.trim();
+    const email = document.getElementById('seekerEmail').value.trim();
+    const password = document.getElementById('seekerPassword').value;
+
+    if (!firstName || !lastName || !email || !password) {
+        showToast('Please fill in all required fields');
+        return;
+    }
+
+    if (password.length < 6) {
+        showToast('Password must be at least 6 characters');
+        return;
+    }
+
+    showToast('Creating your account...');
+
+    const { data, error } = await supabaseClient.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+            data: {
+                full_name: `${firstName} ${lastName}`,
+                role: 'seeker'
+            }
+        }
+    });
+
+    if (error) {
+        console.error('Registration error:', error);
+        showToast(error.message);
+        return;
+    }
+
+    if (data.user && !data.session) {
+        showToast('Account created! Check your email to confirm your account.');
+        return;
+    }
+
+    if (data.user) {
+        currentRole = 'seeker';
+        showPage('seekerDashboardPage');
+        switchSeekerTab('overview');
+        renderSeekerOverview();
+        showToast('Account created successfully!');
+    }
 }
 
 function logout() {
