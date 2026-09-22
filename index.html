@@ -1539,17 +1539,17 @@ function handleSearch() {
   else showToast('No exact match — showing all jobs');
 }
 
-function handleSeekerRegister() {
-  const f = document.getElementById('seekerFirst').value;
-  const l = document.getElementById('seekerLast').value;
-  const e = document.getElementById('seekerEmail').value;
-  if(!f || !l || !e) { showToast('Please fill in all required fields'); return; }
-  showToast(`Welcome, ${f}! Your job seeker account has been created 🎉`);
-}
+// function handleSeekerRegister() {
+//   const f = document.getElementById('seekerFirst').value;
+//   const l = document.getElementById('seekerLast').value;
+//   const e = document.getElementById('seekerEmail').value;
+//   if(!f || !l || !e) { showToast('Please fill in all required fields'); return; }
+//   showToast(`Welcome, ${f}! Your job seeker account has been created 🎉`);
+// }
 
-function handleEmployerRegister() {
-  showToast('Employer account created! Check your email to verify. 🏢');
-}
+// function handleEmployerRegister() {
+//   showToast('Employer account created! Check your email to verify. 🏢');
+// }
 
 function handleNewsletter() {
   const e = document.getElementById('newsletterEmail').value;
