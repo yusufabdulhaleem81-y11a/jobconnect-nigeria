@@ -1984,12 +1984,84 @@ function renderSeekerOverview() {
     </div>`).join('');
 }
 
-function renderAllApplicationsTable() {
-  const tbl = document.getElementById('allApplicationsTable');
-  tbl.innerHTML = `<tr><th>Job Title</th><th>Company</th><th>Date Applied</th><th>Status</th></tr>` +
-    applications.map(a => `<tr><td class="cell-title">${a.jobTitle}</td><td>${a.company}</td><td>${a.appliedDate}</td><td><span class="badge-pill b-${a.status}">${capitalize(a.status)}</span></td></tr>`).join('');
-}
+// function renderAllApplicationsTable() {
+//   const tbl = document.getElementById('allApplicationsTable');
+//   tbl.innerHTML = `<tr><th>Job Title</th><th>Company</th><th>Date Applied</th><th>Status</th></tr>` +
+//     applications.map(a => `<tr><td class="cell-title">${a.jobTitle}</td><td>${a.company}</td><td>${a.appliedDate}</td><td><span class="badge-pill b-${a.status}">${capitalize(a.status)}</span></td></tr>`).join('');
+// }
+async function renderAllApplicationsTable() {
+    const tbl = document.getElementById('allApplicationsTable');
 
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        tbl.innerHTML = `
+            <tr>
+                <td colspan="4">Please log in to view your applications.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    const { data, error } = await supabaseClient
+        .from('applications')
+        .select(`
+            id,
+            job_id,
+            status,
+            created_at,
+            jobs (
+                title,
+                company
+            )
+        `)
+        .eq('seeker_id', user.id)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        console.error('Applications load error:', error);
+
+        tbl.innerHTML = `
+            <tr>
+                <td colspan="4">Could not load your applications.</td>
+            </tr>
+        `;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        tbl.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align:center;padding:2rem;">
+                    You have not submitted any applications yet.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbl.innerHTML =
+        `<tr>
+            <th>Job Title</th>
+            <th>Company</th>
+            <th>Date Applied</th>
+            <th>Status</th>
+        </tr>` +
+
+        data.map(a => `
+            <tr>
+                <td class="cell-title">${a.jobs?.title || 'Unknown Job'}</td>
+                <td>${a.jobs?.company || 'Unknown Company'}</td>
+                <td>${new Date(a.created_at).toISOString().slice(0, 10)}</td>
+                <td>
+                    <span class="badge-pill b-${a.status}">
+                        ${capitalize(a.status)}
+                    </span>
+                </td>
+            </tr>
+        `).join('');
+}
 function renderSeekerJobsGrid(list) {
   const grid = document.getElementById('seekerJobsGrid');
   grid.innerHTML = list.map(j => `
