@@ -1565,10 +1565,64 @@ function showToast(msg) {
   setTimeout(()=>t.classList.remove('show'), 3500);
 }
 
-function toggleMenu() {
-  alert('Menu: Find Jobs | Categories | For Employers | How It Works | About');
+// function toggleMenu() {
+//   alert('Menu: Find Jobs | Categories | For Employers | How It Works | About');
+// }
+ function toggleMenu() {
+    let menu = document.getElementById('mobileMenu');
+
+    if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'mobileMenu';
+
+        menu.innerHTML = `
+            <a href="#jobs" onclick="closeMobileMenu()">Find Jobs</a>
+            <a href="#categories" onclick="closeMobileMenu()">Categories</a>
+            <a href="#employers" onclick="closeMobileMenu()">For Employers</a>
+            <a href="#how" onclick="closeMobileMenu()">How It Works</a>
+            <a href="#about" onclick="closeMobileMenu()">About</a>
+            <a href="javascript:void(0)" onclick="closeMobileMenu(); openLogin('seeker')">Sign In</a>
+            <a href="javascript:void(0)" onclick="closeMobileMenu(); document.getElementById('register').scrollIntoView({behavior:'smooth'})">Sign Up</a>
+        `;
+
+        menu.style.cssText = `
+            position: fixed;
+            top: 68px;
+            right: 15px;
+            width: 240px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            z-index: 9999;
+            padding: 8px 0;
+        `;
+
+        menu.querySelectorAll('a').forEach(link => {
+            link.style.cssText = `
+                display: block;
+                padding: 14px 20px;
+                color: #1e293b;
+                text-decoration: none;
+                font-size: 16px;
+                font-weight: 600;
+                border-bottom: 1px solid #eee;
+            `;
+        });
+
+        document.body.appendChild(menu);
+    } else {
+        menu.style.display =
+            menu.style.display === 'none' ? 'block' : 'none';
+    }
 }
 
+function closeMobileMenu() {
+    const menu = document.getElementById('mobileMenu');
+
+    if (menu) {
+        menu.style.display = 'none';
+    }
+}
 window.addEventListener('scroll', () => {
   const bt = document.getElementById('backTop');
   bt.classList.toggle('visible', window.scrollY > 400);
