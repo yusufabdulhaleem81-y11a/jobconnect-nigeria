@@ -981,58 +981,58 @@
 
       <!-- OVERVIEW -->
       <div class="tab-content active" id="seeker-overview">
-        <div class="app-welcome">Welcome back, <span id="seekerNameWelcome">John Adeyemi</span> 👋</div>
-        <div class="stat-row">
-          <div class="stat-box"><div class="n" id="statApplied">3</div><div class="l">Jobs Applied</div></div>
-          <div class="stat-box c2"><div class="n" id="statShortlisted">1</div><div class="l">Shortlisted</div></div>
-          <div class="stat-box c3"><div class="n" id="statInterview">1</div><div class="l">Interviews Scheduled</div></div>
-          <div class="stat-box c4"><div class="n" id="statSaved">0</div><div class="l">Saved Jobs</div></div>
+          <div class="app-welcome">Welcome back, <span id="seekerNameWelcome">John Adeyemi</span> 👋</div>
+          <div class="stat-row">
+            <div class="stat-box"><div class="n" id="statApplied">3</div><div class="l">Jobs Applied</div></div>
+            <div class="stat-box c2"><div class="n" id="statShortlisted">1</div><div class="l">Shortlisted</div></div>
+            <div class="stat-box c3"><div class="n" id="statInterview">1</div><div class="l">Interviews Scheduled</div></div>
+            <div class="stat-box c4"><div class="n" id="statSaved">0</div><div class="l">Saved Jobs</div></div>
+          </div>
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>Recent Applications</h3><span class="action-link" onclick="switchSeekerTab('applications')">View All →</span></div>
+            <table class="data-table" id="recentApplicationsTable"></table>
+          </div>
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>Recommended Jobs For You</h3><span class="action-link" onclick="switchSeekerTab('jobs')">Browse More →</span></div>
+            <div id="recommendedJobsList"></div>
+          </div>
         </div>
-        <div class="panel-card">
-          <div class="panel-card-head"><h3>Recent Applications</h3><span class="action-link" onclick="switchSeekerTab('applications')">View All →</span></div>
-          <table class="data-table" id="recentApplicationsTable"></table>
-        </div>
-        <div class="panel-card">
-          <div class="panel-card-head"><h3>Recommended Jobs For You</h3><span class="action-link" onclick="switchSeekerTab('jobs')">Browse More →</span></div>
-          <div id="recommendedJobsList"></div>
-        </div>
-      </div>
 
-      <!-- PROFILE -->
-      <div class="tab-content" id="seeker-profile">
-        <div class="app-welcome">My Profile</div>
-        <div class="panel-card">
-          <div class="panel-card-head"><h3>Profile Photo</h3></div>
-          <div style="display:flex;align-items:center;gap:1.5rem;">
-            <div id="profPhotoPreview" style="width:84px;height:84px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.6rem;overflow:hidden;flex-shrink:0;">JA</div>
-            <div>
-              <input type="file" id="profPhoto" accept="image/*" onchange="previewProfilePhoto(event)" style="display:none;">
-              <button class="btn btn-outline btn-sm" onclick="document.getElementById('profPhoto').click()">Upload Photo</button>
-              <div style="font-size:0.78rem;color:var(--mid);margin-top:0.5rem;">JPG or PNG, max 2MB</div>
+        <!-- PROFILE -->
+        <div class="tab-content" id="seeker-profile">
+          <div class="app-welcome">My Profile</div>
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>Profile Photo</h3></div>
+            <div style="display:flex;align-items:center;gap:1.5rem;">
+              <div id="profPhotoPreview" style="width:84px;height:84px;border-radius:50%;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.6rem;overflow:hidden;flex-shrink:0;">JA</div>
+              <div>
+                <input type="file" id="profPhoto" accept="image/*" onchange="previewProfilePhoto(event)" style="display:none;">
+                <button class="btn btn-outline btn-sm" onclick="document.getElementById('profPhoto').click()">Upload Photo</button>
+                <div style="font-size:0.78rem;color:var(--mid);margin-top:0.5rem;">JPG or PNG, max 2MB</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="panel-card">
-          <div class="panel-card-head"><h3>Personal Information</h3></div>
-          <div class="form-row">
-            <div class="form-group"><label>First Name</label><input type="text" id="profFirst" value="John"></div>
-            <div class="form-group"><label>Last Name</label><input type="text" id="profLast" value="Adeyemi"></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Date of Birth</label><input type="date" id="profDob" value="1997-04-12"></div>
-            <div class="form-group"><label>Gender</label>
-              <select id="profGender"><option>Male</option><option>Female</option><option>Other</option></select>
+          <div class="panel-card">
+            <div class="panel-card-head"><h3>Personal Information</h3></div>
+            <div class="form-row">
+              <div class="form-group"><label>First Name</label><input type="text" id="profFirst" value="John"></div>
+              <div class="form-group"><label>Last Name</label><input type="text" id="profLast" value="Adeyemi"></div>
             </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Phone Number</label><input type="tel" id="profPhone" value="+234 803 123 4567"></div>
-            <div class="form-group"><label>Current Location</label><input type="text" id="profLocation" value="Lagos, Nigeria"></div>
-          </div>
-          <div class="form-group"><label>Preferred Job Location</label><input type="text" id="profPreferredLoc" placeholder="e.g. Lagos, Remote"></div>
-          <div class="form-group"><label>Skills (comma separated)</label><textarea id="profSkills" rows="2" style="width:100%;padding:0.7rem 1rem;border:2px solid var(--light-2);border-radius:8px;outline:none;font-family:inherit;">JavaScript, React, Node.js, SQL</textarea></div>
-          <div class="form-group">
-            <label>Upload / Update CV (PDF or Word, max 5MB)</label>
-            <input type="file" id="profCv" accept=".pdf,.doc,.docx" onchange="handleCvUpload(event)" style="display:none;">
+            <div class="form-row">
+              <div class="form-group"><label>Date of Birth</label><input type="date" id="profDob" value="1997-04-12"></div>
+              <div class="form-group"><label>Gender</label>
+                <select id="profGender"><option>Male</option><option>Female</option><option>Other</option></select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Phone Number</label><input type="tel" id="profPhone" value="+234 803 123 4567"></div>
+              <div class="form-group"><label>Current Location</label><input type="text" id="profLocation" value="Lagos, Nigeria"></div>
+            </div>
+            <div class="form-group"><label>Preferred Job Location</label><input type="text" id="profPreferredLoc" placeholder="e.g. Lagos, Remote"></div>
+            <div class="form-group"><label>Skills (comma separated)</label><textarea id="profSkills" rows="2" style="width:100%;padding:0.7rem 1rem;border:2px solid var(--light-2);border-radius:8px;outline:none;font-family:inherit;">JavaScript, React, Node.js, SQL</textarea></div>
+            <div class="form-group">
+              <label>Upload / Update CV (PDF or Word, max 5MB)</label>
+              <input type="file" id="profCv" accept=".pdf,.doc,.docx" onchange="handleCvUpload(event)" style="display:none;">
             <div style="display:flex;align-items:center;gap:0.75rem;">
               <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('profCv').click()">Choose File</button>
               <span id="cvFileName" style="font-size:0.85rem;color:var(--mid);">📄 John_Adeyemi_CV.pdf (uploaded 2 weeks ago)</span>
@@ -1647,6 +1647,12 @@ function setLoginRole(role) {
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
+    // Show the logged-in user's real name
+const seekerNameWelcome = document.getElementById('seekerNameWelcome');
+
+if (seekerNameWelcome && profile.full_name) {
+    seekerNameWelcome.textContent = profile.full_name;
+}
 
     if (!email) {
         showToast('Please enter your email address');
@@ -2072,3 +2078,4 @@ function deleteCategory(id) { categories = categories.filter(c=>c.id!==id); rend
 
 </body>
 </html>
+z
