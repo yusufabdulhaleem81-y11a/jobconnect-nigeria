@@ -1402,7 +1402,7 @@
 </button>
 
 <script>
-const jobs = [
+let jobs  = [
   { id:1, title:'Senior Software Engineer', company:'Flutterwave', logo:'FL', location:'Lagos, Nigeria', type:'Full-time', category:'Technology', tags:['React','Node.js','AWS'], salary:'₦1.2M – ₦1.8M/month', posted:'2 days ago', badge:'featured', desc:'Join Flutterwave\'s engineering team to build payment infrastructure serving millions across Africa. You will design, build and maintain high-performance APIs and microservices.' },
   { id:2, title:'Data Analyst', company:'Access Bank', logo:'AB', location:'Abuja, FCT', type:'Full-time', category:'Finance', tags:['Excel','SQL','Power BI'], salary:'₦450K – ₦650K/month', posted:'1 day ago', badge:'new', desc:'We are looking for a Data Analyst to help our retail banking division turn data into actionable insights. You\'ll build dashboards and support business decisions with robust analysis.' },
   { id:3, title:'Frontend Developer', company:'Andela', logo:'AN', location:'Remote, Nigeria', type:'Remote', category:'Technology', tags:['Vue.js','TypeScript','CSS'], salary:'$2,000 – $3,500/month', posted:'3 days ago', badge:'remote', desc:'Andela is hiring frontend developers to join remote global engineering teams. You\'ll work with international clients on cutting-edge web applications.' },
@@ -1442,7 +1442,22 @@ function renderJobs(filtered) {
   `).join('');
   document.getElementById('jobCount').textContent = `Showing ${filtered.length} of 12,400+ jobs`;
 }
+async function loadJobsFromSupabase() {
+    const { data, error } = await supabaseClient
+        .from('jobs')
+        .select('*')
+        .order('created_at', { ascending: false });
 
+    if (error) {
+        console.error('Error loading jobs:', error);
+        showToast('Could not load jobs from Supabase.');
+        return;
+    }
+
+    jobs = data || [];
+
+    loadJobsFromSupabase();
+}
 function openJob(id) {
   const j = jobs.find(x=>x.id===id);
   document.getElementById('modalContent').innerHTML = `
@@ -1502,15 +1517,77 @@ function openApplyForm(jobId) {
   `;
 }
 
-function submitApplication(jobId) {
-  const j = jobs.find(x=>x.id===jobId);
-  applications.unshift({ id: Date.now(), jobTitle: j.title, company: j.company, status: 'submitted', appliedDate: new Date().toISOString().slice(0,10) });
-  document.getElementById('statApplied').textContent = applications.length;
-  closeModal();
-  showToast(`Application submitted for ${j.title}! 🎉`);
-  switchSeekerTab('applications');
-}
+// function submitApplication(jobId) {
+//   const j = jobs.find(x=>x.id===jobId);
+//   applications.unshift({ id: Date.now(), jobTitle: j.title, company: j.company, status: 'submitted', appliedDate: new Date().toISOString().slice(0,10) });
+//   document.getElementById('statApplied').textContent = applications.length;
+//   closeModal();
+//   showToast(`Application submitted for ${j.title}! 🎉`);
+//   switchSeekerTab('applications');
+// }
+async function submitApplication(jobId) {
+    const j = jobs.find(x => x.id === jobId);
 
+    if (!j) {
+        showToast('Job not found.');
+        return;
+    }
+
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        showToast('Please sign in as a Job Seeker to apply.');
+        return;
+    }
+
+    const coverLetter =
+        document.getElementById('applyCoverLetter')?.value.trim() || '';
+
+    const cvFile =
+        document.getElementById('applyCv')?.files?.[0];
+
+    if (cvFile && cvFile.size > 5 * 1024 * 1024) {
+        showToast('CV must be 5MB or smaller.');
+        return;
+    }
+
+    showToast('Submitting application...');
+
+    const { data, error } = await supabaseClient
+        .from('applications')
+        .insert({
+            job_id: j.id,
+            seeker_id: user.id,
+            cover_letter: coverLetter,
+            status: 'submitted'
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Application error:', error);
+        showToast('Could not submit application: ' + error.message);
+        return;
+    }
+
+    applications.unshift({
+        id: data.id,
+        jobTitle: j.title,
+        company: j.company,
+        status: data.status,
+        appliedDate: new Date().toISOString().slice(0, 10)
+    });
+
+    document.getElementById('statApplied').textContent =
+        applications.length;
+
+    closeModal();
+
+    showToast(`Application submitted for ${j.title}! 🎉`);
+
+    switchSeekerTab('applications');
+}
 function setFilter(btn, type) {
   document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
