@@ -1647,12 +1647,7 @@ function setLoginRole(role) {
 async function handleLogin() {
     const email = document.getElementById('loginEmail').value.trim();
     const password = document.getElementById('loginPassword').value;
-    // Show the logged-in user's real name
-const seekerNameWelcome = document.getElementById('seekerNameWelcome');
-
-if (seekerNameWelcome && profile.full_name) {
-    seekerNameWelcome.textContent = profile.full_name;
-}
+    
 
     if (!email) {
         showToast('Please enter your email address');
@@ -1697,7 +1692,12 @@ if (seekerNameWelcome && profile.full_name) {
 
     // Use the role stored in the database
     currentRole = profile.role;
+// Show the logged-in user's real name
+const seekerNameWelcome = document.getElementById('seekerNameWelcome');
 
+if (seekerNameWelcome && profile.full_name) {
+    seekerNameWelcome.textContent = profile.full_name;
+}
     if (currentRole === 'seeker') {
         showPage('seekerDashboardPage');
         switchSeekerTab('overview');
