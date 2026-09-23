@@ -1966,9 +1966,10 @@ function switchSeekerTab(tab) {
   document.getElementById('seeker-' + tab)?.classList.add('active');
   document.querySelector(`#seekerDashboardPage [data-seeker-tab="${tab}"]`)?.classList.add('active');
   document.querySelector(`#seekerDashboardPage [data-seeker-side="${tab}"]`)?.classList.add('active');
-  if (tab === 'jobs') renderSeekerJobsGrid(jobs);
-  if (tab === 'applications') renderAllApplicationsTable();
-  if (tab === 'saved') renderSavedJobs();
+if (tab === 'jobs') renderSeekerJobsGrid(jobs);
+if (tab === 'applications') renderAllApplicationsTable();
+if (tab === 'saved') renderSavedJobs();
+if (tab === 'profile') loadMyProfile();
 }
 
 function renderSeekerOverview() {
@@ -2030,8 +2031,109 @@ function renderSavedJobs() {
 
 function removeSavedJob(id) { savedJobIds = savedJobIds.filter(x=>x!==id); renderSavedJobs(); showToast('Removed from saved jobs'); }
 
-function saveProfile() { showToast('Profile updated successfully ✅'); }
+// function saveProfile() { showToast('Profile updated successfully ✅'); }
+async function saveProfile() {
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
 
+    if (userError || !user) {
+        showToast('Please log in first.');
+        return;
+    }
+
+    const firstName = document.getElementById('profFirst').value.trim();
+    const lastName = document.getElementById('profLast').value.trim();
+    const phone = document.getElementById('profPhone').value.trim();
+    const location = document.getElementById('profLocation').value.trim();
+    const preferredLocation = document.getElementById('profPreferredLoc').value.trim();
+    const skills = document.getElementById('profSkills').value.trim();
+
+    const fullName = `${firstName} ${lastName}`.trim();
+
+    const { error } = await supabaseClient
+        .from('profiles')
+        .update({
+            full_name: fullName,
+            phone: phone,
+            location: location,
+            preferred_location: preferredLocation,
+            skills: skills
+        })
+        .eq('id', user.id);
+
+    if (error) {
+        console.error('Profile update error:', error);
+        showToast('Could not update profile: ' + error.message);
+        return;
+    }
+
+    showToast('Profile updated successfully ✅');
+}
+async function loadMyProfile() {
+
+    const { data: { user }, error: userError } =
+        await supabaseClient.auth.getUser();
+
+    if (userError || !user) {
+        return;
+    }
+
+    const { data: profile, error } = await supabaseClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    if (error || !profile) {
+        console.error('Profile load error:', error);
+        return;
+    }
+
+    // Split full name
+    const names = (profile.full_name || '').split(' ');
+
+    document.getElementById('profFirst').value =
+        names[0] || '';
+
+    document.getElementById('profLast').value =
+        names.slice(1).join(' ') || '';
+
+    document.getElementById('profPhone').value =
+        profile.phone || '';
+
+    document.getElementById('profLocation').value =
+        profile.location || '';
+
+    document.getElementById('profPreferredLoc').value =
+        profile.preferred_location || '';
+
+    document.getElementById('profSkills').value =
+        profile.skills || '';
+
+    // Welcome text
+    const welcome = document.getElementById('seekerNameWelcome');
+    if (welcome) {
+        welcome.textContent = profile.full_name || 'Job Seeker';
+    }
+
+    // Top name
+    const topName = document.getElementById('seekerNameTop');
+    if (topName) {
+        topName.textContent = profile.full_name || 'Job Seeker';
+    }
+
+    // Avatar initials
+    const avatar = document.getElementById('seekerAvatar');
+    if (avatar && profile.full_name) {
+        const initials = profile.full_name
+            .split(' ')
+            .map(n => n[0])
+            .join('')
+            .substring(0, 2);
+
+        avatar.textContent = initials;
+    }
+}
 function previewProfilePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
